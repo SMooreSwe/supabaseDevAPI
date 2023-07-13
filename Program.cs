@@ -97,6 +97,40 @@ app.MapPost("/developers", async(
     return Results.Ok(newDeveloper.Id);
 });
 
+app.MapPut("/developers/{id}", async(
+    int id,
+    CreateDeveloperRequest request,
+    Supabase.Client client) =>
+{
+    var responseOldDev = await client
+    .From<Developer>()
+    .Where(dev => dev.Id == id)
+    .Get();
+    
+    var oldDeveloper = responseOldDev.Models.FirstOrDefault();
+
+    if (oldDeveloper is null)
+    {
+        return Results.NotFound();
+    }
+    
+    var update = await client
+    .From<Developer>()
+    .Where(dev => dev.Id == id)
+    .Set(dev => dev.Name!, request.Name)
+    .Set(dev => dev.Email!, request.Email)
+    .Update();
+    
+    var response = await client
+    .From<Developer>()
+    .Where(dev => dev.Id == id)
+    .Get();
+    
+    var updatedDeveloper = response.Models.First();
+
+    return Results.Ok(updatedDeveloper.Id);
+});
+
 app.MapDelete("/developers/{id}", async(
     int id, 
     Supabase.Client client) =>

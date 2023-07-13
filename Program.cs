@@ -1,6 +1,8 @@
 using Newtonsoft.Json;
 using Supabase;
 
+DotNetEnv.Env.Load();
+
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors(options =>
@@ -21,9 +23,9 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<Supabase.Client>(_ => 
 new Supabase.Client(
     //Insert SupabaseURL below
-   "SupabaseURL",
+   System.Environment.GetEnvironmentVariable("SUPABASE_URL"),
    //Insert SupabaseAPIKey below
-    "SupabaseAPIKey",
+   System.Environment.GetEnvironmentVariable("SUPABASE_APIKEY"),
     new SupabaseOptions
     {
         AutoRefreshToken = true,

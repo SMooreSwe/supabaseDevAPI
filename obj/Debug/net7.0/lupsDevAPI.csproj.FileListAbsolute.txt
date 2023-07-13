@@ -140,3 +140,5 @@ C:\PGP\supabaseDevAPI\obj\Debug\net7.0\refint\lupsDevAPI.dll
 C:\PGP\supabaseDevAPI\obj\Debug\net7.0\lupsDevAPI.pdb
 C:\PGP\supabaseDevAPI\obj\Debug\net7.0\lupsDevAPI.genruntimeconfig.cache
 C:\PGP\supabaseDevAPI\obj\Debug\net7.0\ref\lupsDevAPI.dll
+C:\PGP\supabaseDevAPI\bin\Debug\net7.0\DotNetEnv.dll
+C:\PGP\supabaseDevAPI\bin\Debug\net7.0\Sprache.dll

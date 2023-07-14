@@ -1,7 +1,20 @@
 using Newtonsoft.Json;
 using Supabase;
 
+DotNetEnv.Env.Load();
+
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+                      policy  =>
+                      {
+                          policy.WithOrigins("http://127.0.0.1:5173")
+                            .AllowAnyHeader()
+                            .AllowAnyMethod();
+                      });
+});
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -10,9 +23,9 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<Supabase.Client>(_ => 
 new Supabase.Client(
     //Insert SupabaseURL below
-   "SupabaseURL",
+   System.Environment.GetEnvironmentVariable("SUPABASE_URL"),
    //Insert SupabaseAPIKey below
-    "SupabaseAPIKey",
+   System.Environment.GetEnvironmentVariable("SUPABASE_APIKEY"),
     new SupabaseOptions
     {
         AutoRefreshToken = true,
@@ -27,6 +40,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors(MyAllowSpecificOrigins);
 
 app.MapGet("/developers", async(
     Supabase.Client client) =>
@@ -84,6 +99,40 @@ app.MapPost("/developers", async(
     var newDeveloper = response.Models.First();
 
     return Results.Ok(newDeveloper.Id);
+});
+
+app.MapPut("/developers/{id}", async(
+    int id,
+    CreateDeveloperRequest request,
+    Supabase.Client client) =>
+{
+    var responseOldDev = await client
+    .From<Developer>()
+    .Where(dev => dev.Id == id)
+    .Get();
+    
+    var oldDeveloper = responseOldDev.Models.FirstOrDefault();
+
+    if (oldDeveloper is null)
+    {
+        return Results.NotFound();
+    }
+    
+    var update = await client
+    .From<Developer>()
+    .Where(dev => dev.Id == id)
+    .Set(dev => dev.Name!, request.Name)
+    .Set(dev => dev.Email!, request.Email)
+    .Update();
+    
+    var response = await client
+    .From<Developer>()
+    .Where(dev => dev.Id == id)
+    .Get();
+    
+    var updatedDeveloper = response.Models.First();
+
+    return Results.Ok(updatedDeveloper.Id);
 });
 
 app.MapDelete("/developers/{id}", async(
